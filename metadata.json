@@ -1,0 +1,6 @@
+{
+  "name": "STUPA GENERATOR",
+  "description": "Platform AI Administrasi Guru Kurikulum Merdeka & KBC Kemenag — Modul Ajar, RPP, LKPD, Soal HOTS, Rubrik, ATP, Prota, Prosem, Modul P5 & Jurnal Harian.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
