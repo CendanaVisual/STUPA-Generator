@@ -8,6 +8,7 @@ import { HistoryDashboard } from './components/HistoryDashboard';
 import { SubscriptionModal } from './components/SubscriptionModal';
 import { AuthModal } from './components/AuthModal';
 import { ShareModal } from './components/ShareModal';
+import { generateDocumentWithAI } from './utils/geminiClient';
 import {
   DocType,
   DocFormData,
@@ -17,7 +18,53 @@ import {
 } from './types';
 import { AlertCircle, Sparkles, GraduationCap, ShieldCheck, Heart } from 'lucide-react';
 
-export function App() {
+// Error Boundary Component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('STUPA Generator Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8">
+          <div className="max-w-md text-center space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+            <h1 className="text-xl font-extrabold text-slate-900">
+              Terjadi Kesalahan Sistem
+            </h1>
+            <p className="text-sm text-slate-600">
+              {this.state.error?.message || 'Silakan muat ulang halaman.'}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md transition-all"
+            >
+              Muat Ulang Halaman
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function AppContent() {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('stupa_theme') === 'dark';
   });
@@ -102,31 +149,6 @@ export function App() {
     }
   }, [currentUser]);
 
-  // Check URL share parameters
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const shareId = params.get('shareId');
-    if (shareId) {
-      setIsLoading(true);
-      fetch(`/api/shared-document/${shareId}`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Dokumen berbagi tidak ditemukan.');
-          return res.json();
-        })
-        .then((data) => {
-          if (data && data.doc) {
-            setCurrentDoc(data.doc);
-            setActiveTab('create');
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          setError('Tautan dokumen yang Anda buka tidak valid atau telah kedaluwarsa.');
-        })
-        .finally(() => setIsLoading(false));
-    }
-  }, []);
-
   const handleGenerateDoc = async (formData: DocFormData) => {
     setIsLoading(true);
     setError(null);
@@ -139,18 +161,8 @@ export function App() {
         authorNip: currentUser?.nip || '198504122010012015',
       };
 
-      const response = await fetch('/api/generate-document', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Gagal menggenerasi dokumen pembelajaran.');
-      }
-
-      const generatedDoc: GeneratedDocument = await response.json();
+      // Use client-side Gemini API directly instead of server fetch
+      const generatedDoc = await generateDocumentWithAI(payload);
       setCurrentDoc(generatedDoc);
 
       // Save to history
@@ -173,29 +185,12 @@ export function App() {
   };
 
   const handleShareDoc = async (docToShare: GeneratedDocument) => {
-    try {
-      const response = await fetch('/api/share-document', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ doc: docToShare }),
-      });
-
-      if (!response.ok) throw new Error('Gagal membuat tautan berbagi.');
-
-      const data = await response.json();
-      setShareData({
-        isOpen: true,
-        doc: docToShare,
-        shareUrl: `?shareId=${data.id}`,
-      });
-    } catch (err) {
-      console.error(err);
-      setShareData({
-        isOpen: true,
-        doc: docToShare,
-        shareUrl: `?shareId=${docToShare.id}`,
-      });
-    }
+    // Client-side share using document ID (no server needed)
+    setShareData({
+      isOpen: true,
+      doc: docToShare,
+      shareUrl: `?shareId=${docToShare.id}`,
+    });
   };
 
   const handleDeleteDoc = (id: string) => {
@@ -373,6 +368,14 @@ export function App() {
         shareUrl={shareData.shareUrl}
       />
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   );
 }
 

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { GeneratedDocument, DocSection } from '../types';
 import { exportDocumentToDocx } from '../utils/docxExporter';
+import { regenerateSectionWithAI } from '../utils/geminiClient';
 
 interface DocPreviewEditorProps {
   document: GeneratedDocument;
@@ -91,25 +92,18 @@ export const DocPreviewEditor: React.FC<DocPreviewEditorProps> = ({
     setPolishModal((prev) => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await fetch('/api/regenerate-section', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sectionTitle: polishModal.section.title,
-          currentContent: polishModal.section.content,
-          promptInstruction: polishModal.instruction,
-          docMetadata: {
-            mataPelajaran: doc.mataPelajaran,
-            topikMateri: doc.topikMateri,
-          },
-        }),
-      });
+      const newContent = await regenerateSectionWithAI(
+        polishModal.section.title,
+        polishModal.section.content,
+        polishModal.instruction,
+        {
+          mataPelajaran: doc.mataPelajaran,
+          topikMateri: doc.topikMateri,
+        }
+      );
 
-      if (!response.ok) throw new Error('Gagal memproses AI Polish.');
-
-      const data = await response.json();
-      if (data.content) {
-        handleUpdateSectionContent(polishModal.section.id, data.content);
+      if (newContent) {
+        handleUpdateSectionContent(polishModal.section.id, newContent);
       }
 
       setPolishModal({ isOpen: false, section: null, instruction: '', isLoading: false });

@@ -156,7 +156,7 @@ export const exportDocumentToDocx = async (docData: GeneratedDocument) => {
       docxParagraphs.push(new Paragraph({ spacing: { after: 180 } }));
     } else {
       // Parse content paragraphs/lists
-      const lines = sec.content.split('\n');
+      const lines = (sec.content || '').split('\n');
       lines.forEach((line) => {
         const trimmed = line.trim();
         if (!trimmed) return;
