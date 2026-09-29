@@ -711,7 +711,7 @@ export const DocGeneratorForm: React.FC<DocGeneratorFormProps> = ({
       {/* Action Submit Button */}
       <div className="pt-4 border-t border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-xs text-slate-500 dark:text-slate-400">
-          ✨ Menggunakan <strong className="text-slate-800 dark:text-slate-200">Gemini 3.6 Flash AI Engine</strong> untuk format resmi Kurikulum Merdeka.
+          ✨ Menggunakan <strong className="text-slate-800 dark:text-slate-200">Gemini 2.0 Flash AI Engine</strong> untuk format resmi Kurikulum Merdeka.
         </div>
 
         <button

@@ -102,7 +102,23 @@ FORMAT RESPONS WAJIB JSON DENGAN STRUKTUR INI:
   ]
 }`;
 
-    const userPrompt = `Buatkan dokumen "${docType}" terlengkap untuk:
+    const docTypeMap: Record<string, string> = {
+      modul_ajar: 'Modul Ajar / RPP',
+      lkpd: 'Lembar Kerja Peserta Didik (LKPD)',
+      soal_hots: 'Kisi-kisi dan Bank Soal HOTS',
+      rubrik: 'Rubrik Penilaian Kualitatif',
+      atp_prota_prosem: 'Alur Tujuan Pembelajaran, Program Tahunan, dan Program Semester',
+      modul_p5: 'Modul Kokulikuler Proyek Penguatan Profil Pelajar Pancasila (P5)',
+      asesmen_diagnostik: 'Instrumen Asesmen Diagnostik (Kognitif & Non-Kognitif)',
+      jurnal_harian: 'Jurnal Refleksi Mengajar Harian Guru',
+      kktp: 'Kriteria Ketercapaian Tujuan Pembelajaran (KKTP)',
+      pengolahan_nilai: 'Format Rekapitulasi dan Pengolahan Nilai',
+      slide_presentasi: 'Draf Konten dan Outline Slide Presentasi'
+    };
+    
+    const mappedDocType = docTypeMap[docType] || docType.toUpperCase();
+
+    const userPrompt = `Buatkan dokumen "${mappedDocType}" terlengkap untuk:
 - Mapel: ${mataPelajaran}
 - Kelas: ${jenjangKelas}
 - Topik: ${topikMateri}

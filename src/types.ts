@@ -6,7 +6,10 @@ export type DocType =
   | 'atp_prota_prosem'
   | 'modul_p5'
   | 'asesmen_diagnostik'
-  | 'jurnal_harian';
+  | 'jurnal_harian'
+  | 'kktp'
+  | 'pengolahan_nilai'
+  | 'slide_presentasi';
 
 export type CurriculumType = 'merdeka' | 'kbc_kemenag' | 'k13';
 
